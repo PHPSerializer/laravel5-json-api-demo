@@ -3,9 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 
-class Employees extends Model
+class Customers extends Model
 {
     /**
      * @var bool
@@ -15,7 +14,7 @@ class Employees extends Model
     /**
      * @var string
      */
-    protected $table = 'employees';
+    protected $table = 'customers';
 
     /**
      * @var string

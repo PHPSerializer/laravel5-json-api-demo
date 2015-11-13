@@ -13,6 +13,7 @@ namespace App\Http\Controllers\Api;
 use App\Employees;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use NilPortugues\App\Repository\Eloquent\EmployeesRepository;
 
 
 /**
@@ -21,22 +22,104 @@ use Illuminate\Http\Request;
  */
 class EmployeesController extends Controller
 {
+    /**
+     * @var \NilPortugues\App\Repository\Eloquent\EmployeesRepository
+     */
+    private $repository;
+
+    /**
+     * @param EmployeesRepository $repository
+     */
+    public function __construct(EmployeesRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
     public function listAction(Request $request)
     {
-        $page = $request->get('page', 1);
-        $amount = $request->get('amount', 10);
+        $page   = $request->query('page', 1);
+        $amount = $request->query('amount', 10);
 
         $employees = Employees::query()->paginate($amount, ['*'], 'page', $page);
 
+        if ($employees->lastPage() < $page) {
+            throw new \Exception("Out of bounds");
+        }
+
         print_r($employees);
-        die();
     }
 
-    public function getAction($id)
+    /**
+     * @param \Illuminate\Http\Request $request
+     *
+     * @throws \Exception
+     *
+     */
+    public function getAction(Request $request)
     {
-        $employee = Employees::query()->findOrFail($id);
+        $employee = $this->repository->find($request->id);
 
         print_r($employee);
-        die();
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
+    public function postAction(Request $request)
+    {
+        $employee = $this->repository->add($request->all());
+
+        print_r($employee);
+    }
+
+
+    /**
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
+    public function patchAction(Request $request)
+    {
+        $employee = $this->repository->add(
+            array_merge(['id' => $request->id], $request->all())
+        );
+
+        print_r($employee);
+    }
+
+
+    /**
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
+    public function putAction(Request $request)
+    {
+        $employee = $this->repository->add(
+            array_merge(['id' => $request->id], $request->all())
+        );
+
+        print_r($employee);
+    }
+
+
+    /**
+     * @param Request $request
+     *
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request)
+    {
+
+        $this->repository->delete($request->id);
+
+        echo 'tried delete';
     }
 } 

@@ -12,40 +12,10 @@
 */
 
 Route::group(['prefix' => 'api/v1/'],function() {
-    Route::get('employees', array(
-            'as' => 'employees.list',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@listAction',
-        )
-    );
-
-    Route::get('employees/{id}', array(
-            'as' => 'employees.get',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction'
-        )
-    );
-
-    Route::post('employees', array(
-            'as' => 'employees.post',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction'
-        )
-    );
-
-    Route::put('employees/{id}', array(
-            'as' => 'employees.put',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction'
-        )
-    );
-
-    Route::patch('employees/{id}', array(
-            'as' => 'employees.patch',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction'
-        )
-    );
-
-
-    Route::delete('employee/{id}', array(
-            'as' => 'employees.delete',
-            'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction'
-        )
-    );
+    Route::post('employees', ['as' => 'employees.post','uses' => '\App\Http\Controllers\Api\EmployeesController@postAction']);
+    Route::get('employees', ['as' => 'employees.list', 'uses' => '\App\Http\Controllers\Api\EmployeesController@listAction']);
+    Route::get('employees/{id}', ['as' => 'employees.get', 'uses' => '\App\Http\Controllers\Api\EmployeesController@getAction']);
+    Route::put('employees/{id}', ['as' => 'employees.put','uses' => '\App\Http\Controllers\Api\EmployeesController@putAction']);
+    Route::patch('employees/{id}', ['as' => 'employees.patch', 'uses' => '\App\Http\Controllers\Api\EmployeesController@patchAction']);
+    Route::delete('employees/{id}', ['as' => 'employees.delete', 'uses' => '\App\Http\Controllers\Api\EmployeesController@deleteAction']);
 });

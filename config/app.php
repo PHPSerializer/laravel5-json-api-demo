@@ -144,6 +144,12 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        'Way\Generators\GeneratorsServiceProvider',
+        'Xethron\MigrationsGenerator\MigrationsGeneratorServiceProvider',
+        'Orangehill\Iseed\IseedServiceProvider',
+        'Laracasts\Generators\GeneratorsServiceProvider'
+
     ],
 
     /*

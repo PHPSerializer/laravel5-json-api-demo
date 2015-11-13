@@ -3,10 +3,10 @@
 
 ### Import the database dump
 
-The database we will be using it's called `employees`.
+The database we will be using it's called `northwind`.
 
 ```
-$ gunzip < employees.sql.gz | mysql -u USERNAME -pPASSWORD employees
+$ gunzip < northwind.sql.gz | mysql -u USERNAME -pPASSWORD northwind
 ```
 
 
@@ -15,5 +15,5 @@ $ gunzip < employees.sql.gz | mysql -u USERNAME -pPASSWORD employees
 (Optional) For those wanting to preserve the changes done, the other way done:
 
 ```
-$ mysqldump -u USERNAME -pPASSWORD employees | gzip -c | cat > employees.sql.gz
+$ mysqldump -u USERNAME -pPASSWORD northwind | gzip -c | cat > northwind.sql.gz
 ```
