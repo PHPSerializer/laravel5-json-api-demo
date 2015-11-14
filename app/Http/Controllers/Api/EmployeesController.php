@@ -14,6 +14,9 @@ use App\Employees;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use NilPortugues\App\Repository\Eloquent\EmployeesRepository;
+use NilPortugues\Laravel5\JsonApiSerializer\JsonApiRequestTrait;
+use NilPortugues\Laravel5\JsonApiSerializer\JsonApiResponseTrait;
+use NilPortugues\Laravel5\JsonApiSerializer\JsonApiSerializer;
 
 
 /**
@@ -22,104 +25,133 @@ use NilPortugues\App\Repository\Eloquent\EmployeesRepository;
  */
 class EmployeesController extends Controller
 {
+    use JsonApiResponseTrait;
+    use JsonApiRequestTrait;
+
     /**
-     * @var \NilPortugues\App\Repository\Eloquent\EmployeesRepository
+     * @var EmployeesRepository
      */
     private $repository;
 
     /**
-     * @param EmployeesRepository $repository
+     * @var JsonApiSerializer
      */
-    public function __construct(EmployeesRepository $repository)
+    private $serializer;
+
+    /**
+     * @param EmployeesRepository $repository
+     * @param JsonApiSerializer   $serializer
+     */
+    public function __construct(EmployeesRepository $repository, JsonApiSerializer $serializer)
     {
         $this->repository = $repository;
+        $this->serializer = $serializer;
     }
+
 
     /**
      * @param Request $request
      *
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function listAction(Request $request)
     {
-        $page   = $request->query('page', 1);
-        $amount = $request->query('amount', 10);
+        $apiRequest = $this->buildJsonApiRequest($request);
 
-        $employees = Employees::query()->paginate($amount, ['*'], 'page', $page);
+        $page = $apiRequest->getPageNumber();
+        $limit = $apiRequest->getPageSize();
+
+        $employees = Employees::query()->paginate($limit, ['*'], 'page', $page);
 
         if ($employees->lastPage() < $page) {
-            throw new \Exception("Out of bounds");
+            return $this->resourceNotFoundResponse(
+                'Employees Not Found',
+                sprintf('Requested employees page %s was not found.', $page)
+            );
         }
 
-        print_r($employees);
+        return $this->responseCollection(__METHOD__, $this->serializer, $apiRequest, $employees, $employees->total());
     }
+
 
     /**
      * @param \Illuminate\Http\Request $request
      *
-     * @throws \Exception
-     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function getAction(Request $request)
     {
-        $employee = $this->repository->find($request->id);
+        try {
+            $employee   = $this->repository->find($request->id);
+            $serialized = $this->serializer->serialize($employee);
+            return $this->response($serialized);
 
-        print_r($employee);
+        } catch (\Exception $e) {
+            return $this->resourceNotFoundResponse(
+                'Employee Not Found',
+                sprintf('Employee with id %s was not found.', $request->id)
+            );
+        }
     }
 
     /**
      * @param Request $request
      *
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function postAction(Request $request)
     {
-        $employee = $this->repository->add($request->all());
+        try {
+            $employee = $this->repository->add($request->all());
+            $serialized = $this->serializer->serialize($employee);
+            $locationUrl = action(sprintf("%s@%s", __CLASS__, 'getAction'), [ $employee->id ]);
 
-        print_r($employee);
+            return $this->resourceCreatedResponse($serialized, $locationUrl);
+
+        } catch (\Exception $e) {
+            echo 'Many errors can happen!';
+            die();
+        }
     }
 
 
     /**
      * @param Request $request
      *
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function patchAction(Request $request)
     {
-        $employee = $this->repository->add(
-            array_merge(['id' => $request->id], $request->all())
-        );
+        $employee = $this->repository->add(array_merge(['id' => $request->id], $request->all()));
+        $serialized = $this->serializer->serialize($employee);
 
-        print_r($employee);
+        return $this->resourceUpdatedResponse($serialized);
     }
 
 
     /**
      * @param Request $request
      *
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function putAction(Request $request)
     {
-        $employee = $this->repository->add(
-            array_merge(['id' => $request->id], $request->all())
-        );
+        $employee = $this->repository->add(array_merge(['id' => $request->id], $request->all()));
+        $serialized = $this->serializer->serialize($employee);
 
-        print_r($employee);
+        return $this->resourceUpdatedResponse($serialized);
     }
 
 
     /**
      * @param Request $request
      *
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteAction(Request $request)
     {
-
         $this->repository->delete($request->id);
 
-        echo 'tried delete';
+        return $this->resourceDeletedResponse('');
     }
 } 
